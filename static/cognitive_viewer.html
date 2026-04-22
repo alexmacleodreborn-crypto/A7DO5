@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>A7DO Cognitive Viewer</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/reactflow@11/dist/umd/index.js"></script>
+  <link href="https://unpkg.com/reactflow@11/dist/style.css" rel="stylesheet" />
+  <style>
+    body { margin:0; font-family:sans-serif; }
+    #root { width:100vw; height:100vh; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const { useEffect, useState } = React;
+const ReactFlow = window.ReactFlow.default;
+
+function App() {
+  const [elements, setElements] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/cognitive/graph')
+      .then(res => res.json())
+      .then(data => {
+        const nodes = data.nodes.map(n => ({
+          id: n.id,
+          data: { label: n.token + ' (' + n.intensity + ')' },
+          position: { x: Math.random()*500, y: Math.random()*500 }
+        }));
+
+        const edges = data.edges.map(e => ({
+          id: e.from + '-' + e.to,
+          source: e.from,
+          target: e.to,
+          label: 'R=' + e.resistance
+        }));
+
+        setElements([...nodes, ...edges]);
+      });
+  }, []);
+
+  return React.createElement(ReactFlow, { elements });
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
